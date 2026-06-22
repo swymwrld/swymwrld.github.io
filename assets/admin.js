@@ -167,22 +167,23 @@
       var progEl  = $id(progId);
       if (!zone || !fileInp) return;
 
-      function handleFileForCrop(f) {
-        if (!f) return;
+      function openCropper(sourceUrl, isFile, originalName) {
         var modal = $id('cropper-modal');
         var image = $id('cropper-image');
         var cancelBtn = $id('cropper-cancel');
         var saveBtn = $id('cropper-save');
 
-        var objectUrl = URL.createObjectURL(f);
-        image.src = objectUrl;
+        // Avoid CORS issues when exporting canvas
+        image.crossOrigin = 'anonymous';
+        image.src = sourceUrl;
         modal.style.display = 'flex';
 
         if (cropperInstance) cropperInstance.destroy();
         cropperInstance = new Cropper(image, {
           aspectRatio: 1,
-          viewMode: 1,
-          background: false,
+          viewMode: 0,
+          dragMode: 'move',
+          background: true,
           autoCropArea: 0.9
         });
 
@@ -190,7 +191,7 @@
           modal.style.display = 'none';
           cropperInstance.destroy();
           cropperInstance = null;
-          fileInp.value = '';
+          if (isFile) fileInp.value = '';
         };
 
         saveBtn.onclick = async function() {
@@ -199,15 +200,33 @@
           cropperInstance.destroy();
           cropperInstance = null;
 
-          // Convert canvas to blob
           canvas.toBlob(async function(blob) {
-            var ext = f.name.split('.').pop() || 'png';
-            if (ext.toLowerCase() === 'svg') ext = 'png'; // Cropper rasterizes SVGs
+            var ext = originalName.split('.').pop() || 'png';
+            if (ext.toLowerCase() === 'svg') ext = 'png'; 
             var newFile = new File([blob], 'logo.' + ext, { type: 'image/' + ext });
             var url = await uploadFile(newFile, folder, progEl);
             if (url) onUrlReady(url);
           }, 'image/png');
         };
+      }
+
+      function handleFileForCrop(f) {
+        if (!f) return;
+        var objectUrl = URL.createObjectURL(f);
+        openCropper(objectUrl, true, f.name);
+      }
+
+      var editBtn = $id('btn-edit-logo');
+      if (editBtn) {
+        editBtn.addEventListener('click', function() {
+          var currentUrl = $id('p-logo').value || (content && content.profile && content.profile.logoUrl);
+          if (!currentUrl) {
+            toast('No logo uploaded yet to edit!', 'error');
+            return;
+          }
+          // Add timestamp to avoid cached CORS issues
+          openCropper(currentUrl + (currentUrl.includes('?') ? '&' : '?') + 't=' + Date.now(), false, 'logo.png');
+        });
       }
 
       zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
@@ -288,7 +307,8 @@
       fg('Brand Initials', 'p-brand',        p.brandInitials,  'text', '', 'e.g. SK'),
       fg('Custom Logo URL','p-logo',         p.logoUrl,        'url',  'form-full', 'Overrides initials if provided'),
       '<div class="form-group form-full">',
-      '<p class="url-or" style="margin-bottom:8px">or upload & crop a logo image</p>',
+      '<button type="button" class="btn btn-secondary btn-sm" id="btn-edit-logo" style="margin-bottom:8px;">Edit Current Logo</button>',
+      '<p class="url-or" style="margin-bottom:8px; margin-top:8px;">or upload & crop a logo image</p>',
       buildCropUploadZone('profile-logo', 'image/*', 'images', function(url) {
         p.logoUrl = url; var lInp = $id('p-logo'); if (lInp) lInp.value = url; toast('Logo uploaded', 'success');
       }),
