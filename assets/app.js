@@ -115,7 +115,10 @@
           nebula = gltf.scene;
           nebula.scale.set(100, 100, 100);
           scene.add(nebula);
-          document.body.classList.add('loaded');
+          // Wait briefly for Three.js to compile shaders/textures to GPU
+          setTimeout(function() {
+            document.body.classList.add('loaded');
+          }, 800);
         },
         function(xhr) {
           // Progress - show website after 3s even if still loading
