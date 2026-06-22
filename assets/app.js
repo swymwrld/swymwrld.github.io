@@ -68,6 +68,7 @@
     scene.add(ambientLight);
 
     var nebula = null;
+    var starsMesh = null;
 
     // ── Instant particle starfield (shows while GLB loads) ──────────────────
     (function createStars() {
@@ -100,7 +101,8 @@
         sizeAttenuation: true,
         depthWrite: false
       });
-      scene.add(new THREE.Points(geometry, material));
+      starsMesh = new THREE.Points(geometry, material);
+      scene.add(starsMesh);
     })();
     // ────────────────────────────────────────────────────────────────────────
 
@@ -206,6 +208,17 @@
       if (nebula) {
         nebula.rotation.y += 0.0003;
         nebula.rotation.x += 0.0001;
+      }
+
+      // Fade out the default starfield once the main site/nebula is loaded
+      if (document.body.classList.contains('loaded') && starsMesh && starsMesh.material.opacity > 0) {
+        starsMesh.material.opacity -= 0.01;
+        if (starsMesh.material.opacity <= 0) {
+          scene.remove(starsMesh);
+          starsMesh.geometry.dispose();
+          starsMesh.material.dispose();
+          starsMesh = null;
+        }
       }
 
       // Comet cursor
