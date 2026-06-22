@@ -111,7 +111,7 @@
       const loader = new GLTFLoader();
 
       loader.load(
-        'assets/models/Nebula_HDRi_2.glb',
+        'assets/models/Nebula_HDRi_2.glb?v=3',
         function(gltf) {
           // Success
           nebula = gltf.scene;
