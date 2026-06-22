@@ -259,7 +259,7 @@
     var brandLink = $id('brand-link');
     if (brandLink) {
       if (p.logoUrl) {
-        brandLink.innerHTML = '<img src="' + esc(p.logoUrl) + '" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />';
+        brandLink.innerHTML = '<img src="' + esc(p.logoUrl) + '" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;" />';
       } else {
         brandLink.innerHTML = '<span id="brand-text">' + esc(p.brandInitials || 'SK') + '</span>';
       }
@@ -317,7 +317,7 @@
     /* Section visibility — hide/show sections based on admin toggle */
     var vis = data.sectionVisibility || {};
     var sectionMap = {
-      'music':   'music',
+      'music':   'music-tracks',
       'lyrics':  'lyrics',
       'studio':  'studio',
       'lab':     'lab',
@@ -333,6 +333,16 @@
         el.classList.remove('section-hidden');
       }
     });
+
+    // Special logic for the parent Music section
+    var musicSection = document.getElementById('music');
+    if (musicSection) {
+      if (vis['music'] === false && vis['lyrics'] === false) {
+        musicSection.classList.add('section-hidden');
+      } else {
+        musicSection.classList.remove('section-hidden');
+      }
+    }
   }
 
   /* ── PROJECTS ─────────────────────────────────────── */
