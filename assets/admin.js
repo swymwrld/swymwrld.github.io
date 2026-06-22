@@ -204,6 +204,13 @@
     el.innerHTML = [
       fg('Name',           'p-name',         p.name,           'text'),
       fg('Brand Initials', 'p-brand',        p.brandInitials,  'text', '', 'e.g. SK'),
+      fg('Custom Logo URL','p-logo',         p.logoUrl,        'url',  'form-full', 'Overrides initials if provided'),
+      '<div class="form-group form-full">',
+      '<p class="url-or" style="margin-bottom:8px">or upload a logo image</p>',
+      buildUploadZone('profile-logo', 'image/*', 'images', function(url) {
+        p.logoUrl = url; var lInp = $id('p-logo'); if (lInp) lInp.value = url; toast('Logo uploaded ✓', 'success');
+      }),
+      '</div>',
       fg('Email',          'p-email',        p.email,          'email'),
       fg('Location',       'p-location',     p.location,       'text'),
       fg('GitHub URL',     'p-github',       p.github,         'url'),
@@ -213,9 +220,10 @@
       fgTA('Hero Intro paragraph',        'p-intro',    p.intro,   4, 'form-full'),
       fgTA('Contact Line',                'p-contactLine', p.contactLine, 3, 'form-full'),
     ].join('');
-    bindLive(el, ['p-name','p-brand','p-email','p-location','p-github','p-linkedin','p-resumeUrl','p-title','p-intro','p-contactLine'], function (values) {
+    bindLive(el, ['p-name','p-brand','p-logo','p-email','p-location','p-github','p-linkedin','p-resumeUrl','p-title','p-intro','p-contactLine'], function (values) {
       content.profile.name          = values['p-name']        || '';
       content.profile.brandInitials = values['p-brand']       || '';
+      content.profile.logoUrl       = values['p-logo']        || '';
       content.profile.email         = values['p-email']       || '';
       content.profile.location      = values['p-location']    || '';
       content.profile.github        = values['p-github']      || '';
@@ -449,10 +457,22 @@
       selectedVideoIdx = 0;
     }
     selectedVideoIdx = Math.min(selectedVideoIdx, content.videos.length - 1);
-    buildMediaSelect('video-select', content.videos, selectedVideoIdx, function (i) {
-      selectedVideoIdx = i; renderVideoForm();
-    });
+    renderVideoList();
     renderVideoForm();
+  }
+
+  function renderVideoList() {
+    var el = $id('video-list-admin');
+    if (!el) return;
+    el.innerHTML = (content.videos || []).map(function (v, i) {
+      return '<button class="admin-list-item' + (i === selectedVideoIdx ? ' active' : '') + '" data-vidx="' + i + '"><strong>' + esc(v.title || 'Untitled Video') + '</strong><span>' + esc(v.type || 'Video') + '</span></button>';
+    }).join('');
+    el.querySelectorAll('[data-vidx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedVideoIdx = parseInt(btn.dataset.vidx);
+        renderVideosSection();
+      });
+    });
   }
 
   function renderVideoForm() {
@@ -476,6 +496,7 @@
       }),
       '</div>',
       fg('Uploaded File URL (auto-filled)', 'vf-fileurl', v.fileUrl, 'url', 'form-full'),
+      '<div class="form-full" style="margin-top:16px"><button type="button" class="btn btn-danger btn-sm" id="del-video-btn">Delete this video</button></div>'
     ].join('');
 
     bindLive(wrap, ['vf-title','vf-type','vf-url','vf-thumb','vf-desc','vf-fileurl'], function (val) {
@@ -485,9 +506,17 @@
       v.thumbnail   = val['vf-thumb']   || '';
       v.description = val['vf-desc']    || '';
       v.fileUrl     = val['vf-fileurl'] || '';
-      buildMediaSelect('video-select', content.videos, selectedVideoIdx, function (i) {
-        selectedVideoIdx = i; renderVideoForm();
-      });
+      renderVideoList();
+    });
+
+    var del = $id('del-video-btn');
+    if (del) del.addEventListener('click', function () {
+      if (content.videos.length <= 1) { toast('Cannot delete last video.', 'error'); return; }
+      if (!confirm('Delete "' + v.title + '"?')) return;
+      content.videos.splice(selectedVideoIdx, 1);
+      selectedVideoIdx = Math.max(0, selectedVideoIdx - 1);
+      renderVideosSection();
+      toast('Video deleted.', 'success');
     });
   }
 
@@ -498,10 +527,22 @@
       selectedModelIdx = 0;
     }
     selectedModelIdx = Math.min(selectedModelIdx, content.models.length - 1);
-    buildMediaSelect('model-select', content.models, selectedModelIdx, function (i) {
-      selectedModelIdx = i; renderModelForm();
-    });
+    renderModelList();
     renderModelForm();
+  }
+
+  function renderModelList() {
+    var el = $id('model-list-admin');
+    if (!el) return;
+    el.innerHTML = (content.models || []).map(function (m, i) {
+      return '<button class="admin-list-item' + (i === selectedModelIdx ? ' active' : '') + '" data-midx="' + i + '"><strong>' + esc(m.title || 'Untitled Model') + '</strong><span>' + esc(m.format || '3D') + '</span></button>';
+    }).join('');
+    el.querySelectorAll('[data-midx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedModelIdx = parseInt(btn.dataset.midx);
+        renderModelsSection();
+      });
+    });
   }
 
   function renderModelForm() {
@@ -524,6 +565,7 @@
       }),
       '</div>',
       fg('Uploaded GLB/GLTF URL (auto-filled)', 'mf-fileurl', m.fileUrl, 'url', 'form-full'),
+      '<div class="form-full" style="margin-top:16px"><button type="button" class="btn btn-danger btn-sm" id="del-model-btn">Delete this model</button></div>'
     ].join('');
 
     bindLive(wrap, ['mf-title','mf-format','mf-url','mf-desc','mf-fileurl'], function (val) {
@@ -532,9 +574,17 @@
       m.url         = val['mf-url']     || '';
       m.description = val['mf-desc']    || '';
       m.fileUrl     = val['mf-fileurl'] || '';
-      buildMediaSelect('model-select', content.models, selectedModelIdx, function (i) {
-        selectedModelIdx = i; renderModelForm();
-      });
+      renderModelList();
+    });
+
+    var del = $id('del-model-btn');
+    if (del) del.addEventListener('click', function () {
+      if (content.models.length <= 1) { toast('Cannot delete last model.', 'error'); return; }
+      if (!confirm('Delete "' + m.title + '"?')) return;
+      content.models.splice(selectedModelIdx, 1);
+      selectedModelIdx = Math.max(0, selectedModelIdx - 1);
+      renderModelsSection();
+      toast('Model deleted.', 'success');
     });
   }
 
@@ -545,10 +595,22 @@
       selectedTrackIdx = 0;
     }
     selectedTrackIdx = Math.min(selectedTrackIdx, content.tracks.length - 1);
-    buildMediaSelect('track-select', content.tracks, selectedTrackIdx, function (i) {
-      selectedTrackIdx = i; renderTrackForm();
-    });
+    renderTrackList();
     renderTrackForm();
+  }
+
+  function renderTrackList() {
+    var el = $id('track-list-admin');
+    if (!el) return;
+    el.innerHTML = (content.tracks || []).map(function (t, i) {
+      return '<button class="admin-list-item' + (i === selectedTrackIdx ? ' active' : '') + '" data-tidx="' + i + '"><strong>' + esc(t.title || 'Untitled Track') + '</strong><span>Audio</span></button>';
+    }).join('');
+    el.querySelectorAll('[data-tidx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedTrackIdx = parseInt(btn.dataset.tidx);
+        renderMusicSection();
+      });
+    });
   }
 
   function renderTrackForm() {
@@ -570,6 +632,7 @@
       }),
       '</div>',
       fg('Uploaded Audio URL (auto-filled)', 'tf-fileurl', t.fileUrl, 'url', 'form-full'),
+      '<div class="form-full" style="margin-top:16px"><button type="button" class="btn btn-danger btn-sm" id="del-track-btn">Delete this track</button></div>'
     ].join('');
 
     bindLive(wrap, ['tf-title','tf-url','tf-desc','tf-fileurl'], function (val) {
@@ -577,9 +640,17 @@
       t.url         = val['tf-url']     || '';
       t.description = val['tf-desc']    || '';
       t.fileUrl     = val['tf-fileurl'] || '';
-      buildMediaSelect('track-select', content.tracks, selectedTrackIdx, function (i) {
-        selectedTrackIdx = i; renderTrackForm();
-      });
+      renderTrackList();
+    });
+
+    var del = $id('del-track-btn');
+    if (del) del.addEventListener('click', function () {
+      if (content.tracks.length <= 1) { toast('Cannot delete last track.', 'error'); return; }
+      if (!confirm('Delete "' + t.title + '"?')) return;
+      content.tracks.splice(selectedTrackIdx, 1);
+      selectedTrackIdx = Math.max(0, selectedTrackIdx - 1);
+      renderMusicSection();
+      toast('Track deleted.', 'success');
     });
   }
 
@@ -805,6 +876,7 @@
     var logBtn = $id('logout-btn');
     if (logBtn) logBtn.addEventListener('click', async function () {
       await sb.auth.signOut();
+      sessionStorage.removeItem('admin_authed');
       $id('admin-view').hidden = true;
       $id('login-view').hidden = false;
       toast('Signed out.');
@@ -827,14 +899,6 @@
       selectedVideoIdx = content.videos.length - 1;
       renderVideosSection();
       toast('Video slot added.', 'success');
-    });
-    var delVid = $id('delete-video-btn');
-    if (delVid) delVid.addEventListener('click', function () {
-      if (content.videos.length <= 1) { toast('Cannot delete last video.', 'error'); return; }
-      content.videos.splice(selectedVideoIdx, 1);
-      selectedVideoIdx = Math.max(0, selectedVideoIdx - 1);
-      renderVideosSection();
-      toast('Video deleted.', 'success');
     });
 
     /* Add Model */
@@ -861,14 +925,6 @@
       selectedTrackIdx = content.tracks.length - 1;
       renderMusicSection();
       toast('Track added.', 'success');
-    });
-    var delTr = $id('delete-track-btn');
-    if (delTr) delTr.addEventListener('click', function () {
-      if (content.tracks.length <= 1) { toast('Cannot delete last track.', 'error'); return; }
-      content.tracks.splice(selectedTrackIdx, 1);
-      selectedTrackIdx = Math.max(0, selectedTrackIdx - 1);
-      renderMusicSection();
-      toast('Track deleted.', 'success');
     });
 
     /* Add Lyric */
@@ -906,6 +962,7 @@
         toast('Access Denied: ' + res.error.message, 'error');
       } else {
         showAdminPanel();
+        sessionStorage.setItem('admin_authed', '1');
         toast('Welcome back ✓', 'success');
       }
     });
@@ -925,10 +982,17 @@
   await loadContent();
   bindActions();
 
-  /* Check existing session */
-  var session = await sb.auth.getSession();
-  if (session.data && session.data.session) {
-    showAdminPanel();
+  /* SECURITY: Always show login first.
+     Only auto-restore session if user explicitly logged in during THIS
+     browser session (tracked via sessionStorage, not just Supabase cookie). */
+  var alreadyAuthed = sessionStorage.getItem('admin_authed') === '1';
+  if (alreadyAuthed) {
+    var session = await sb.auth.getSession();
+    if (session.data && session.data.session) {
+      showAdminPanel();
+    } else {
+      sessionStorage.removeItem('admin_authed');
+    }
   }
 
 })();

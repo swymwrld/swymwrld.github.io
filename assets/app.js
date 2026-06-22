@@ -109,7 +109,7 @@
       const loader = new GLTFLoader();
 
       loader.load(
-        'https://zctfnbiexqzbnjrhgkjq.supabase.co/storage/v1/object/public/portfolio-media/backgrounds/Nebula_HDRi_2.glb',
+        'assets/models/Nebula_HDRi_2.glb',
         function(gltf) {
           // Success
           nebula = gltf.scene;
@@ -239,8 +239,15 @@
     var p = data.profile || {};
     var h = data.hero    || {};
 
-    /* Brand initials */
-    setText('brand-text', p.brandInitials || 'SK');
+    /* Brand initials or Logo */
+    var brandLink = $id('brand-link');
+    if (brandLink) {
+      if (p.logoUrl) {
+        brandLink.innerHTML = '<img src="' + esc(p.logoUrl) + '" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />';
+      } else {
+        brandLink.innerHTML = '<span id="brand-text">' + esc(p.brandInitials || 'SK') + '</span>';
+      }
+    }
 
     /* Hero panel Mode / Live */
     setText('panel-label', h.panelLabel || 'Mode');
