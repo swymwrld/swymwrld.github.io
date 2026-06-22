@@ -72,17 +72,14 @@ body {
   min-height: 100vh;
 }
 
-    /* Global 1s Fade-in — portfolio page only, NOT admin */
+    /* Instant show — no loading gate (background loads async behind the scenes) */
 body:not(.admin-body) .site-header,
 body:not(.admin-body) main {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1s ease-out;
-}
-body.loaded .site-header, body.loaded main {
   opacity: 1;
   pointer-events: auto;
 }
+/* Section visibility toggle — hidden sections are completely removed from view */
+section.section-hidden { display: none !important; }
 
 
 body::before {
@@ -545,7 +542,8 @@ p  { line-height: 1.65; }
 /* Carousel controls */
 .carousel-controls {
   display: flex; align-items: center; justify-content: center; gap: 20px;
-  margin-top: 32px;
+  margin-top: 44px;
+  position: relative; z-index: 20;
 }
 .carousel-btn {
   width: 48px; height: 48px;

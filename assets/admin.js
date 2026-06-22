@@ -155,7 +155,8 @@
     var titleMap = {
       profile:'Profile', hero:'Hero & Stats', sitetext:'Site Text & Nav', projects:'Projects',
       videos:'Videos', models:'3D Models', music:'Music & Audio',
-      lyrics:'Lyrics', about:'About & Timeline', skills:'Skills & Tags', marquee:'Marquee'
+      lyrics:'Lyrics', about:'About & Timeline', skills:'Skills & Tags', marquee:'Marquee',
+      visibility:'Section Visibility'
     };
     var titleEl = $id('section-title');
     if (titleEl) titleEl.textContent = titleMap[name] || name;
@@ -175,8 +176,24 @@
       about:    renderAboutSection,
       skills:   renderSkillsSection,
       marquee:  renderMarqueeSection,
+      visibility: renderVisibilitySection,
     };
     if (fn[name]) fn[name]();
+  }
+
+  /* ── SECTION: VISIBILITY ───────────────────────────── */
+  function renderVisibilitySection() {
+    var vis = content.sectionVisibility || {};
+    var keys = ['studio', 'lab', 'music', 'lyrics', 'work', 'about'];
+    keys.forEach(function(key) {
+      var el = $id('vis-' + key);
+      if (!el) return;
+      el.checked = vis[key] !== false; // default to visible
+      el.addEventListener('change', function() {
+        if (!content.sectionVisibility) content.sectionVisibility = {};
+        content.sectionVisibility[key] = el.checked;
+      });
+    });
   }
 
   /* ── SECTION: PROFILE ─────────────────────────────── */

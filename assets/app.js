@@ -291,6 +291,25 @@
         return '<span class="marquee-item">' + esc(item) + '</span>';
       }).join('');
     }
+    /* Section visibility — hide/show sections based on admin toggle */
+    var vis = data.sectionVisibility || {};
+    var sectionMap = {
+      'music':   'music',
+      'lyrics':  'lyrics',
+      'studio':  'studio',
+      'lab':     'lab',
+      'work':    'work',
+      'about':   'about'
+    };
+    Object.keys(sectionMap).forEach(function(key) {
+      var el = document.getElementById(sectionMap[key]);
+      if (!el) return;
+      if (vis[key] === false) {
+        el.classList.add('section-hidden');
+      } else {
+        el.classList.remove('section-hidden');
+      }
+    });
   }
 
   /* ── PROJECTS ─────────────────────────────────────── */
