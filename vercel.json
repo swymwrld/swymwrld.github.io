@@ -1,25 +1,11 @@
 {
   "version": 2,
   "name": "swymwrld",
-  "builds": [
-    { "src": "**/*", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ],
-  "headers": [
+  "redirects": [
     {
-      "source": "/admin.html",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
-      ]
-    },
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "source": "/(.*)",
+      "destination": "https://swymwrld.github.io/$1",
+      "permanent": true
     }
   ]
 }
