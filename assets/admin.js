@@ -143,6 +143,88 @@
     return html;
   }
 
+  /* Upload Zone specifically for Image Cropping */
+  var cropperInstance = null;
+  function buildCropUploadZone(id, accept, folder, onUrlReady) {
+    var zoneId = 'zone-' + id;
+    var progId = 'prog-' + id;
+    var html = [
+      '<div class="upload-zone" id="' + zoneId + '">',
+      '<span class="upload-icon">&#8679;</span>',
+      '<p>Drop logo here or click to browse</p>',
+      '<small>Accepted: ' + esc(accept) + '</small>',
+      '<input type="file" accept="' + esc(accept) + '" id="file-' + id + '" />',
+      '</div>',
+      '<div class="upload-progress" id="' + progId + '">',
+      '<div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>',
+      '<p class="progress-label">Uploading…</p>',
+      '</div>'
+    ].join('');
+
+    setTimeout(function () {
+      var zone    = $id(zoneId);
+      var fileInp = $id('file-' + id);
+      var progEl  = $id(progId);
+      if (!zone || !fileInp) return;
+
+      function handleFileForCrop(f) {
+        if (!f) return;
+        var modal = $id('cropper-modal');
+        var image = $id('cropper-image');
+        var cancelBtn = $id('cropper-cancel');
+        var saveBtn = $id('cropper-save');
+
+        var objectUrl = URL.createObjectURL(f);
+        image.src = objectUrl;
+        modal.style.display = 'flex';
+
+        if (cropperInstance) cropperInstance.destroy();
+        cropperInstance = new Cropper(image, {
+          aspectRatio: 1,
+          viewMode: 1,
+          background: false,
+          autoCropArea: 0.9
+        });
+
+        cancelBtn.onclick = function() {
+          modal.style.display = 'none';
+          cropperInstance.destroy();
+          cropperInstance = null;
+          fileInp.value = '';
+        };
+
+        saveBtn.onclick = async function() {
+          var canvas = cropperInstance.getCroppedCanvas({ width: 256, height: 256 });
+          modal.style.display = 'none';
+          cropperInstance.destroy();
+          cropperInstance = null;
+
+          // Convert canvas to blob
+          canvas.toBlob(async function(blob) {
+            var ext = f.name.split('.').pop() || 'png';
+            if (ext.toLowerCase() === 'svg') ext = 'png'; // Cropper rasterizes SVGs
+            var newFile = new File([blob], 'logo.' + ext, { type: 'image/' + ext });
+            var url = await uploadFile(newFile, folder, progEl);
+            if (url) onUrlReady(url);
+          }, 'image/png');
+        };
+      }
+
+      zone.addEventListener('dragover',  function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', function ()   { zone.classList.remove('drag-over'); });
+      zone.addEventListener('drop', function (e) {
+        e.preventDefault(); zone.classList.remove('drag-over');
+        handleFileForCrop(e.dataTransfer.files[0]);
+      });
+
+      fileInp.addEventListener('change', function () {
+        handleFileForCrop(fileInp.files[0]);
+      });
+    }, 50);
+
+    return html;
+  }
+
   /* ── Section Navigation ───────────────────────────── */
   function showSection(name) {
     activeSection = name;
@@ -206,9 +288,9 @@
       fg('Brand Initials', 'p-brand',        p.brandInitials,  'text', '', 'e.g. SK'),
       fg('Custom Logo URL','p-logo',         p.logoUrl,        'url',  'form-full', 'Overrides initials if provided'),
       '<div class="form-group form-full">',
-      '<p class="url-or" style="margin-bottom:8px">or upload a logo image</p>',
-      buildUploadZone('profile-logo', 'image/*', 'images', function(url) {
-        p.logoUrl = url; var lInp = $id('p-logo'); if (lInp) lInp.value = url; toast('Logo uploaded ✓', 'success');
+      '<p class="url-or" style="margin-bottom:8px">or upload & crop a logo image</p>',
+      buildCropUploadZone('profile-logo', 'image/*', 'images', function(url) {
+        p.logoUrl = url; var lInp = $id('p-logo'); if (lInp) lInp.value = url; toast('Logo uploaded', 'success');
       }),
       '</div>',
       fg('Email',          'p-email',        p.email,          'email'),

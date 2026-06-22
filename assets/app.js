@@ -211,7 +211,7 @@
       }
 
       // Fade out the default starfield once the main site/nebula is loaded
-      if (document.body.classList.contains('loaded') && starsMesh && starsMesh.material.opacity > 0) {
+      if (document.body.classList.contains('loaded') && nebula && starsMesh && starsMesh.material.opacity > 0) {
         starsMesh.material.opacity -= 0.01;
         if (starsMesh.material.opacity <= 0) {
           scene.remove(starsMesh);

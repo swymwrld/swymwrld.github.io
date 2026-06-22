@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
   </head>
   <body class="admin-body">
 
@@ -350,6 +351,22 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <!-- Scripts -->
+    <!-- Cropper Modal -->
+    <div id="cropper-modal" class="modal" style="display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
+      <div class="modal-content" style="background:#111; border:1px solid #333; border-radius:12px; padding:24px; max-width:500px; width:100%;">
+        <h3 style="margin:0 0 8px 0;">Adjust Logo</h3>
+        <p style="color:#888; font-size:0.85rem; margin-bottom:16px;">Zoom and drag to fit within the square.</p>
+        <div style="max-height:400px; margin-bottom:20px; background:#000; border-radius:8px; overflow:hidden;">
+          <img id="cropper-image" src="" style="max-width:100%; display:block;" />
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button class="btn btn-secondary" id="cropper-cancel">Cancel</button>
+          <button class="btn btn-primary" id="cropper-save">Crop & Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/content.js"></script>
     <script src="assets/admin.js"></script>
