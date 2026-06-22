@@ -123,12 +123,12 @@
           }, 800);
         },
         function(xhr) {
-          // Progress - show website after 3s even if still loading
+          // Progress - wait up to 5s after last progress event before forcing show
           if (!document.body.classList.contains('loaded')) {
             clearTimeout(fallbackTimer);
             fallbackTimer = setTimeout(function() {
               document.body.classList.add('loaded');
-            }, 3000);
+            }, 5000);
           }
         },
         function(err) {
@@ -142,10 +142,10 @@
       document.body.classList.add('loaded');
     }
 
-    // Safety fallback — show website within 2s no matter what
+    // Safety fallback — wait up to 8s for 3D model before forcing text to show
     var fallbackTimer = setTimeout(function() {
       document.body.classList.add('loaded');
-    }, 2000);
+    }, 8000);
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var targetX = 0, targetY = 0, camX = 0, camY = 0;
