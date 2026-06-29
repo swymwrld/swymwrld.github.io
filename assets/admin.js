@@ -254,6 +254,7 @@
     var btn = document.querySelector('[data-section="' + name + '"]');
     if (btn) btn.classList.add('active');
     var titleMap = {
+      analytics: 'Analytics Dashboard',
       profile:'Profile', hero:'Hero & Stats', sitetext:'Site Text & Nav', projects:'Projects',
       videos:'Videos', models:'3D Models', music:'Music & Audio',
       lyrics:'Lyrics', about:'About & Timeline', skills:'Skills & Tags', marquee:'Marquee',
@@ -266,6 +267,7 @@
 
   function renderSection(name) {
     var fn = {
+      analytics: renderAnalyticsSection,
       profile:  renderProfileSection,
       hero:     renderHeroSection,
       sitetext: renderSiteTextSection,
@@ -295,6 +297,51 @@
         content.sectionVisibility[key] = el.checked;
       });
     });
+  }
+
+  /* ── SECTION: ANALYTICS ───────────────────────────── */
+  async function renderAnalyticsSection() {
+    var el = $id('analytics-admin-container');
+    if (!el) return;
+    el.innerHTML = '<p style="color:var(--text-dim)">Loading analytics...</p>';
+    
+    try {
+      var res = await sb.from('analytics').select('*').order('last_visit', { ascending: false });
+      if (res.error) throw res.error;
+      var visitors = res.data || [];
+      var totalUnique = visitors.length;
+      var totalVisits = visitors.reduce(function(sum, v) { return sum + (v.visit_count || 1); }, 0);
+      
+      var recentHTML = visitors.slice(0, 15).map(function(v) {
+        var last = new Date(v.last_visit);
+        var timeStr = last.toLocaleDateString() + ' ' + last.toLocaleTimeString();
+        return `
+          <div style="background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-family:monospace; color:var(--text-dim)">Visitor #${esc(v.visitor_id.split('_')[2] || v.visitor_id)}</div>
+            <div style="color:var(--text)">${v.visit_count} visit(s)</div>
+            <div style="color:var(--text-dim); font-size:0.85rem">${timeStr}</div>
+          </div>
+        `;
+      }).join('');
+      
+      el.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;">
+          <div style="background:var(--card-bg); border:1px solid var(--border); padding:20px; border-radius:12px; text-align:center;">
+            <h3 style="font-size:2rem; margin:0 0 5px 0">${totalUnique}</h3>
+            <p style="color:var(--text-dim); margin:0; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px">Total Unique Visitors</p>
+          </div>
+          <div style="background:var(--card-bg); border:1px solid var(--border); padding:20px; border-radius:12px; text-align:center;">
+            <h3 style="font-size:2rem; margin:0 0 5px 0">${totalVisits}</h3>
+            <p style="color:var(--text-dim); margin:0; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px">Total Lifetime Visits</p>
+          </div>
+        </div>
+        <h3 style="margin-bottom:15px; font-size:1.1rem; border-bottom:1px solid var(--border); padding-bottom:10px;">Recent Activity</h3>
+        ${recentHTML || '<p style="color:var(--text-dim)">No visitors tracked yet.</p>'}
+      `;
+    } catch(e) {
+      el.innerHTML = '<p style="color:#ff4444">Failed to load analytics. Did you run the SQL script?</p>';
+      console.error(e);
+    }
   }
 
   /* ── SECTION: PROFILE ─────────────────────────────── */

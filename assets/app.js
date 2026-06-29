@@ -1175,6 +1175,41 @@
     setText('contact-heading', sc.heading || 'Build systems. Shape stories.');
   }
 
+  /* ── VISITOR TRACKING ────────────────────────────────── */
+  async function trackVisitor() {
+    try {
+      var visitorId = localStorage.getItem('swym_visitor_id');
+      var lastVisit = localStorage.getItem('swym_last_visit');
+      var visitCount = parseInt(localStorage.getItem('swym_visit_count') || '0');
+      var now = Date.now();
+      
+      if (!visitorId) {
+        visitorId = 'v_' + now + '_' + Math.random().toString(36).substr(2, 9);
+        visitCount = 1;
+        localStorage.setItem('swym_visitor_id', visitorId);
+        localStorage.setItem('swym_last_visit', now.toString());
+        localStorage.setItem('swym_visit_count', visitCount.toString());
+        
+        await sb.from('analytics').insert([{ 
+          visitor_id: visitorId, 
+          visit_count: visitCount 
+        }]);
+      } else {
+        // New session if > 30 mins
+        if (!lastVisit || (now - parseInt(lastVisit)) > 1800000) {
+          visitCount += 1;
+          localStorage.setItem('swym_last_visit', now.toString());
+          localStorage.setItem('swym_visit_count', visitCount.toString());
+          
+          await sb.from('analytics').update({ 
+            visit_count: visitCount,
+            last_visit: new Date().toISOString()
+          }).eq('visitor_id', visitorId);
+        }
+      }
+    } catch(e) { console.warn('Analytics skipped', e); }
+  }
+
   /* ── BOOT ─────────────────────────────────────────── */
   renderProfile();
   renderSiteText();
@@ -1189,6 +1224,7 @@
   initCarouselControls();
   initVideoModal();
   initHeaderScroll();
+  trackVisitor();
   initThree();
   observeAnimated();
 

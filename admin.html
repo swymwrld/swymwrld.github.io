@@ -45,6 +45,8 @@
         </div>
 
         <p class="sidebar-section-label">Content</p>
+        <p class="sidebar-section-label">Overview</p>
+        <button class="admin-nav-btn" data-section="analytics">         <span class="nav-icon">&#128202;</span> Analytics Dashboard</button>
         <button class="admin-nav-btn active" data-section="profile">    <span class="nav-icon">&#128100;</span> Profile</button>
         <button class="admin-nav-btn" data-section="hero">              <span class="nav-icon">&#127968;</span> Hero &amp; Stats</button>
         <button class="admin-nav-btn" data-section="sitetext">          <span class="nav-icon">&#127758;</span> Site Text &amp; Nav</button>
@@ -90,7 +92,16 @@
           </div>
         </div>
 
-        <!-- ── PROFILE ── -->
+        <!-- ANALYTICS SECTION -->
+      <section id="section-analytics" class="admin-section">
+        <div class="section-header">
+          <h2>Analytics Dashboard</h2>
+          <p>Real-time unique visitor and session tracking.</p>
+        </div>
+        <div id="analytics-admin-container"></div>
+      </section>
+
+      <!-- PROFILE SECTION -->
         <section id="section-profile" class="admin-section active">
           <div class="form-grid" id="profile-form-grid"></div>
         </section>
