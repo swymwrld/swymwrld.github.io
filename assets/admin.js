@@ -708,8 +708,8 @@
       fgTA('Description', 'mf-desc', m.description, 3, 'form-full'),
       '</div>',
       '<div style="margin-top:4px">',
-      '<p class="url-or">or upload a 3D model file (GLB/GLTF/OBJ/STEP)</p>',
-      buildUploadZone('model-' + selectedModelIdx, '.glb,.gltf,.obj,.step,.stp', 'models', function (url) {
+      '<p class="url-or">or upload a 3D model file (GLB/GLTF/OBJ)</p>',
+      buildUploadZone('model-' + selectedModelIdx, '.glb,.gltf,.obj', 'models', function (url) {
         m.fileUrl = url; var fInp = $id('mf-fileurl'); if (fInp) fInp.value = url; toast('Model uploaded ✓', 'success');
       }),
       '</div>',

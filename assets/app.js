@@ -793,7 +793,7 @@
       var fileUrl = m.fileUrl || '';
       var ext = fileUrl.split('.').pop().toLowerCase();
       var isGlb = (ext === 'glb' || ext === 'gltf');
-      var isCad = (ext === 'obj' || ext === 'step' || ext === 'stp');
+      var isCad = (ext === 'obj');
       
       var viewerHtml = '';
       if (!fileUrl) {
@@ -938,47 +938,6 @@
             centerModel(obj);
           });
         });
-      } else if (format === 'step' || format === 'stp') {
-        if (!window.occtimportjs) {
-          var s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/npm/occt-import-js@0.0.12/dist/occt-import-js.js';
-          document.head.appendChild(s);
-          s.onload = loadStep;
-        } else {
-          loadStep();
-        }
-        
-        async function loadStep() {
-          try {
-            const occt = await occtimportjs({
-              locateFile: function(name) { return 'https://cdn.jsdelivr.net/npm/occt-import-js@0.0.12/dist/' + name; }
-            });
-            const res = await fetch(url);
-            const buffer = await res.arrayBuffer();
-            const result = occt.ReadStepFile(new Uint8Array(buffer), null);
-            
-            var group = new THREE.Group();
-            var mat = new THREE.MeshStandardMaterial({ color: 0xa0a0a0, roughness: 0.4, metalness: 0.6 });
-            
-            for (let mesh of result.meshes) {
-              let geo = new THREE.BufferGeometry();
-              geo.setAttribute('position', new THREE.Float32BufferAttribute(mesh.attributes.position.array, 3));
-              if (mesh.attributes.normal) {
-                geo.setAttribute('normal', new THREE.Float32BufferAttribute(mesh.attributes.normal.array, 3));
-              } else {
-                geo.computeVertexNormals();
-              }
-              geo.setIndex(new THREE.Uint32BufferAttribute(mesh.index.array, 1));
-              group.add(new THREE.Mesh(geo, mat));
-            }
-            scene.add(group);
-            centerModel(group);
-          } catch(err) {
-            var loaderEl = el.querySelector('.cad-loader');
-            if (loaderEl) loaderEl.innerText = 'Error parsing STEP file.';
-            console.error('STEP parse error', err);
-          }
-        }
       }
     });
   }
