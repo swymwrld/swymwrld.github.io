@@ -791,9 +791,20 @@
 
     track.innerHTML = modelItems.map(function (m, i) {
       var fileUrl = m.fileUrl || '';
-      var viewerHtml = fileUrl
-        ? '<model-viewer src="' + esc(fileUrl) + '" camera-controls auto-rotate shadow-intensity="0.5" environment-image="neutral" exposure="0.8" ar ar-modes="scene-viewer webxr" loading="lazy" alt="' + esc(m.title) + '"></model-viewer>'
-        : '<div class="slide-placeholder"><span class="slide-placeholder-icon">&#127922;</span><p>No GLB file</p></div>';
+      var ext = fileUrl.split('.').pop().toLowerCase();
+      var isGlb = (ext === 'glb' || ext === 'gltf');
+      var isCad = (ext === 'obj' || ext === 'step' || ext === 'stp');
+      
+      var viewerHtml = '';
+      if (!fileUrl) {
+        viewerHtml = '<div class="slide-placeholder"><span class="slide-placeholder-icon">&#127922;</span><p>No 3D file</p></div>';
+      } else if (isGlb) {
+        viewerHtml = '<model-viewer src="' + esc(fileUrl) + '" camera-controls auto-rotate shadow-intensity="0.5" environment-image="neutral" exposure="0.8" ar ar-modes="scene-viewer webxr" loading="lazy" alt="' + esc(m.title) + '"></model-viewer>';
+      } else if (isCad) {
+        viewerHtml = '<div class="custom-cad-viewer" data-url="' + esc(fileUrl) + '" data-format="' + ext + '" style="width:100%; height:100%; position:relative; background:#111; cursor:grab;"></div>';
+      } else {
+        viewerHtml = '<div class="slide-placeholder"><p>Unsupported format</p></div>';
+      }
 
       return [
         '<div class="carousel-slide model-slide" data-idx="' + i + '">',
@@ -817,6 +828,7 @@
     }).join('');
 
     positionModelCarousel();
+    initCustomCADViewers();
 
     /* Buttons */
     var pBtn = $id('model-prev'), nBtn = $id('model-next');
@@ -845,6 +857,130 @@
       function() { var n = modelItems.length; if(!n) return; modelIndex = (modelIndex - 1 + n) % n; positionModelCarousel(); },
       function() { var n = modelItems.length; if(!n) return; modelIndex = (modelIndex + 1) % n; positionModelCarousel(); }
     );
+  }
+
+  /* ── CUSTOM CAD VIEWERS ── */
+  async function initCustomCADViewers() {
+    var viewers = document.querySelectorAll('.custom-cad-viewer');
+    if (!viewers.length) return;
+    
+    let OrbitControls;
+    try {
+      const module = await import('three/addons/controls/OrbitControls.js');
+      OrbitControls = module.OrbitControls;
+    } catch(e) { console.error('Failed to load OrbitControls', e); return; }
+
+    viewers.forEach(function(el) {
+      if (el.dataset.initialized) return;
+      el.dataset.initialized = 'true';
+      
+      var url = el.dataset.url;
+      var format = el.dataset.format;
+      
+      el.innerHTML = '<div class="cad-loader" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--text-dim);font-family:monospace;font-size:0.9rem;">Loading CAD (' + format.toUpperCase() + ')...</div>';
+      
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(50, el.clientWidth / (el.clientHeight || 1), 0.1, 1000);
+      var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(el.clientWidth, el.clientHeight || 300);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      el.appendChild(renderer.domElement);
+      
+      var controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 2.0;
+      
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      var dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(10, 10, 10);
+      scene.add(dirLight);
+      
+      var reqFrame;
+      function animate() {
+        reqFrame = requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+      
+      var ro = new ResizeObserver(function() {
+        if (!el.clientWidth || !el.clientHeight) return;
+        camera.aspect = el.clientWidth / el.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(el.clientWidth, el.clientHeight);
+      });
+      ro.observe(el);
+      
+      function centerModel(object) {
+        var box = new THREE.Box3().setFromObject(object);
+        var center = box.getCenter(new THREE.Vector3());
+        var size = box.getSize(new THREE.Vector3());
+        var maxDim = Math.max(size.x, size.y, size.z);
+        var fov = camera.fov * (Math.PI / 180);
+        var cameraZ = Math.abs(maxDim / 2 * Math.tan(fov * 2)) * 3;
+        
+        object.position.x = -center.x;
+        object.position.y = -center.y;
+        object.position.z = -center.z;
+        camera.position.set(0, maxDim * 0.5, cameraZ);
+        controls.target.set(0, 0, 0);
+        
+        var loaderEl = el.querySelector('.cad-loader');
+        if (loaderEl) loaderEl.remove();
+      }
+
+      if (format === 'obj') {
+        import('three/addons/loaders/OBJLoader.js').then(function(module) {
+          var loader = new module.OBJLoader();
+          loader.load(url, function(obj) {
+            scene.add(obj);
+            centerModel(obj);
+          });
+        });
+      } else if (format === 'step' || format === 'stp') {
+        if (!window.occtimportjs) {
+          var s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/occt-import-js@0.0.12/dist/occt-import-js.js';
+          document.head.appendChild(s);
+          s.onload = loadStep;
+        } else {
+          loadStep();
+        }
+        
+        async function loadStep() {
+          try {
+            const occt = await occtimportjs({
+              locateFile: function(name) { return 'https://cdn.jsdelivr.net/npm/occt-import-js@0.0.12/dist/' + name; }
+            });
+            const res = await fetch(url);
+            const buffer = await res.arrayBuffer();
+            const result = occt.ReadStepFile(new Uint8Array(buffer), null);
+            
+            var group = new THREE.Group();
+            var mat = new THREE.MeshStandardMaterial({ color: 0xa0a0a0, roughness: 0.4, metalness: 0.6 });
+            
+            for (let mesh of result.meshes) {
+              let geo = new THREE.BufferGeometry();
+              geo.setAttribute('position', new THREE.Float32BufferAttribute(mesh.attributes.position.array, 3));
+              if (mesh.attributes.normal) {
+                geo.setAttribute('normal', new THREE.Float32BufferAttribute(mesh.attributes.normal.array, 3));
+              } else {
+                geo.computeVertexNormals();
+              }
+              geo.setIndex(new THREE.Uint32BufferAttribute(mesh.index.array, 1));
+              group.add(new THREE.Mesh(geo, mat));
+            }
+            scene.add(group);
+            centerModel(group);
+          } catch(err) {
+            var loaderEl = el.querySelector('.cad-loader');
+            if (loaderEl) loaderEl.innerText = 'Error parsing STEP file.';
+            console.error('STEP parse error', err);
+          }
+        }
+      }
+    });
   }
 
   function positionModelCarousel() {

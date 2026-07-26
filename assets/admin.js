@@ -708,12 +708,12 @@
       fgTA('Description', 'mf-desc', m.description, 3, 'form-full'),
       '</div>',
       '<div style="margin-top:4px">',
-      '<p class="url-or">or upload a 3D model file (GLB/GLTF)</p>',
-      buildUploadZone('model-' + selectedModelIdx, '.glb,.gltf', 'models', function (url) {
+      '<p class="url-or">or upload a 3D model file (GLB/GLTF/OBJ/STEP)</p>',
+      buildUploadZone('model-' + selectedModelIdx, '.glb,.gltf,.obj,.step,.stp', 'models', function (url) {
         m.fileUrl = url; var fInp = $id('mf-fileurl'); if (fInp) fInp.value = url; toast('Model uploaded ✓', 'success');
       }),
       '</div>',
-      fg('Uploaded GLB/GLTF URL (auto-filled)', 'mf-fileurl', m.fileUrl, 'url', 'form-full'),
+      fg('Uploaded Model URL (auto-filled)', 'mf-fileurl', m.fileUrl, 'url', 'form-full'),
       '<div class="form-full" style="margin-top:16px"><button type="button" class="btn btn-danger btn-sm" id="del-model-btn">Delete this model</button></div>'
     ].join('');
 
