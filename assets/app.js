@@ -801,7 +801,7 @@
       } else if (isGlb) {
         viewerHtml = '<model-viewer src="' + esc(fileUrl) + '" camera-controls auto-rotate shadow-intensity="0.5" environment-image="neutral" exposure="0.8" ar ar-modes="scene-viewer webxr" loading="lazy" alt="' + esc(m.title) + '"></model-viewer>';
       } else if (isCad) {
-        viewerHtml = '<div class="custom-cad-viewer" data-url="' + esc(fileUrl) + '" data-format="' + ext + '" style="width:100%; height:100%; position:relative; background:#111; cursor:grab;"></div>';
+        viewerHtml = '<div class="custom-cad-viewer" data-url="' + esc(fileUrl) + '" data-format="' + ext + '" style="width:100%; height:100%; position:relative; background:transparent; cursor:grab;"></div>';
       } else {
         viewerHtml = '<div class="slide-placeholder"><p>Unsupported format</p></div>';
       }
@@ -917,13 +917,14 @@
         var center = box.getCenter(new THREE.Vector3());
         var size = box.getSize(new THREE.Vector3());
         var maxDim = Math.max(size.x, size.y, size.z);
-        var fov = camera.fov * (Math.PI / 180);
-        var cameraZ = Math.abs(maxDim / 2 * Math.tan(fov * 2)) * 3;
+        
+        var fovRadians = (camera.fov * Math.PI) / 180;
+        var distance = Math.abs((maxDim / 2) / Math.sin(fovRadians / 2));
         
         object.position.x = -center.x;
         object.position.y = -center.y;
         object.position.z = -center.z;
-        camera.position.set(0, maxDim * 0.5, cameraZ);
+        camera.position.set(0, maxDim * 0.2, distance * 1.5);
         controls.target.set(0, 0, 0);
         
         var loaderEl = el.querySelector('.cad-loader');
