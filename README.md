@@ -1,38 +1,28 @@
-# Swayam Portfolio - Zero-Cost Build
+# Swayam's Personal Portfolio & Developer Space 🚀
 
-This is the first working version of the portfolio: a premium static site with a local admin editor.
+Welcome to my personal developer portfolio! This repository hosts the source code for my interactive resume and project showcase, built as a blazing-fast, static web application.
 
-## Open Locally
+## 🌟 Live Demo
+**[swymwrld.github.io](https://swymwrld.github.io)**
 
-Open `index.html` in a browser.
+## 💻 Tech Stack
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Deployment**: GitHub Pages / Vercel
+- **Content Management**: Localized JSON architecture with an integrated Admin Dashboard.
 
-Admin page:
+## 🛠️ Features
+- **Dynamic Content**: Powered by a custom JSON structure (`content.js`), allowing instant updates without touching HTML.
+- **Admin Dashboard**: Includes a secure `admin.html` interface (prototype passcode: `collision-lab`) to edit the portfolio's content locally via `localStorage`.
+- **Media Optimized**: Strategically built to handle 3D `.glb` previews, YouTube unlisted embeds, and compressed web assets without hitting host limits.
 
-- File: `admin.html`
-- Prototype passcode: `collision-lab`
+## 🚀 Local Setup
+Want to run this locally or fork it?
+1. Clone the repository.
+2. Open `index.html` in your favorite browser.
+3. To edit the content, open `admin.html`, make your changes, and hit **Export JSON**. Replace the `assets/content.js` with your exported file!
 
-The current admin saves edits to the same browser using `localStorage`. Use **Export JSON** after editing. In a later step, the exported JSON can replace `assets/content.js` or be connected to a free CMS/backend.
+## 📬 Connect with me
+- GitHub: [@swymwrld](https://github.com/swymwrld)
 
-## Free Hosting Path
-
-Best zero-budget path:
-
-1. Host the static site on GitHub Pages or Cloudflare Pages.
-2. Keep heavy raw videos off the repo. Use YouTube unlisted links for video playback.
-3. Keep web-preview 3D files compressed as `.glb` when possible.
-4. Use the admin editor for drafting content, then export JSON.
-5. Later connect the editor to a free backend:
-   - GitHub-based CMS for static content updates.
-   - Supabase or Firebase free tier for auth, database, and media metadata.
-
-## Media Strategy
-
-Use the site for polished previews:
-
-- YouTube links for edits and reels.
-- Compressed video snippets for short, lightweight previews.
-- `.glb` or `.gltf` for browser 3D previews.
-- `.step`, `.stl`, `.f3d`, `.sldprt` as downloads only when file size is manageable.
-- MP3 links for music snippets.
-
-Do not host large raw client videos directly inside the repo. It will be slow and may hit free host limits.
+---
+*Built with ❤️ by Swayam*
