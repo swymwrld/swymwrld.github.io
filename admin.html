@@ -72,7 +72,7 @@
         <button class="admin-nav-btn" data-section="marquee">           <span class="nav-icon">&#127955;</span> Marquee</button>
 
         <p class="sidebar-section-label">Settings</p>
-        <button class="admin-nav-btn" data-section="visibility">        <span class="nav-icon">&#128065;</span> Section Visibility</button>
+        <button class="admin-nav-btn" data-section="visibility">        <span class="nav-icon">&#128065;</span> Nav &amp; Section Visibility</button>
         <button class="admin-nav-btn" data-section="security">          <span class="nav-icon">&#128274;</span> Security &amp; Password</button>
 
         <div class="sidebar-footer">
@@ -328,38 +328,80 @@
           </div>
         </section>
 
-        <!-- ── SECTION VISIBILITY ── -->
+        <!-- ── SECTION & NAV VISIBILITY ── -->
         <section id="section-visibility" class="admin-section">
+          <!-- Top Bar Navigation Links -->
+          <div class="admin-card" style="margin-bottom:24px">
+            <p class="admin-card-title">&#128204; Top Bar Navigation Items (Header)</p>
+            <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:20px">
+              Control the visibility of individual links, buttons, and icons in the top navigation bar.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px">
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#128295; Work / Projects Link</span>
+                <input type="checkbox" id="navvis-work" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#128303; 3D Lab Link</span>
+                <input type="checkbox" id="navvis-lab" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#127909; Studio Link</span>
+                <input type="checkbox" id="navvis-studio" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#127925; Music Link</span>
+                <input type="checkbox" id="navvis-music" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#9201; About Link</span>
+                <input type="checkbox" id="navvis-about" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#128233; Contact Button</span>
+                <input type="checkbox" id="navvis-contact" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#9881; Brand Logo (SK / Logo)</span>
+                <input type="checkbox" id="navvis-brand" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+            </div>
+          </div>
+
+          <!-- Page Body Sections -->
           <div class="admin-card">
-            <p class="admin-card-title">Show / Hide Sections</p>
-            <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:24px">Toggle any section completely on or off. Hidden sections disappear from the live site instantly after saving.</p>
-            <div style="display:grid;gap:14px">
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
-                <span style="font-weight:600">&#127909; Video Studio</span>
-                <input type="checkbox" id="vis-studio" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
-              </label>
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
-                <span style="font-weight:600">&#128303; 3D Lab</span>
-                <input type="checkbox" id="vis-lab" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
-              </label>
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
-                <span style="font-weight:600">&#127925; Music &amp; Audio</span>
-                <input type="checkbox" id="vis-music" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
-              </label>
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
-                <span style="font-weight:600">&#9997; Lyrics</span>
-                <input type="checkbox" id="vis-lyrics" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
-              </label>
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+            <p class="admin-card-title">&#128065; Page Content Sections</p>
+            <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:20px">
+              Toggle entire sections on or off. Note: If a section is hidden here, its top bar link will also hide automatically.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px">
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
                 <span style="font-weight:600">&#128295; Work / Projects</span>
                 <input type="checkbox" id="vis-work" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
               </label>
-              <label style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#128303; 3D Lab</span>
+                <input type="checkbox" id="vis-lab" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#127909; Video Studio</span>
+                <input type="checkbox" id="vis-studio" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#127925; Music &amp; Audio</span>
+                <input type="checkbox" id="vis-music" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
+                <span style="font-weight:600">&#9997; Lyrics</span>
+                <input type="checkbox" id="vis-lyrics" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer">
                 <span style="font-weight:600">&#9201; About &amp; Timeline</span>
                 <input type="checkbox" id="vis-about" style="width:18px;height:18px;cursor:pointer;accent-color:var(--cyan)">
               </label>
             </div>
           </div>
+        </section>
         <!-- ── SECURITY & ACCESS ── -->
         <section id="section-security" class="admin-section">
           <div class="admin-card" style="max-width:620px;margin-bottom:20px">
@@ -423,6 +465,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/content.js?v=4"></script>
-    <script src="assets/admin.js?v=4"></script>
+    <script src="assets/admin.js?v=5"></script>
   </body>
 </html>

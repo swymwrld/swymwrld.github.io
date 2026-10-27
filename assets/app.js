@@ -343,6 +343,35 @@
         musicSection.classList.remove('section-hidden');
       }
     }
+
+    /* Top Bar Navigation Visibility */
+    var navVis = data.navVisibility || {};
+    var navMap = {
+      'work':    'nav-work',
+      'lab':     'nav-lab',
+      'studio':  'nav-studio',
+      'music':   'nav-music',
+      'about':   'nav-about',
+      'contact': 'nav-contact',
+      'brand':   'brand-link'
+    };
+    Object.keys(navMap).forEach(function(key) {
+      var el = document.getElementById(navMap[key]);
+      if (!el) return;
+
+      var hide = (navVis[key] === false);
+      if (key === 'work' && vis['work'] === false) hide = true;
+      if (key === 'lab' && vis['lab'] === false) hide = true;
+      if (key === 'studio' && vis['studio'] === false) hide = true;
+      if (key === 'about' && vis['about'] === false) hide = true;
+      if (key === 'music' && vis['music'] === false && vis['lyrics'] === false) hide = true;
+
+      if (hide) {
+        el.classList.add('nav-hidden');
+      } else {
+        el.classList.remove('nav-hidden');
+      }
+    });
   }
 
   /* ── PROJECTS ─────────────────────────────────────── */

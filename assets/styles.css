@@ -94,8 +94,8 @@ body.loaded:not(.admin-body) main {
   pointer-events: auto;
   transform: translateY(0);
 }
-/* Section visibility toggle — hidden sections are completely removed from view */
-section.section-hidden { display: none !important; }
+/* Section & Nav visibility toggle — hidden elements are completely removed from view */
+.section-hidden, .nav-hidden, section.section-hidden { display: none !important; }
 
 
 body::before {

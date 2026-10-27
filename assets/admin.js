@@ -257,7 +257,7 @@
       profile:'Profile', hero:'Hero & Stats', sitetext:'Site Text & Nav', projects:'Projects',
       videos:'Videos', models:'3D Models', music:'Music & Audio',
       lyrics:'Lyrics', about:'About & Timeline', skills:'Skills & Tags', marquee:'Marquee',
-      visibility:'Section Visibility',
+      visibility:'Nav & Section Visibility',
       security:'Security & Access'
     };
     var titleEl = $id('section-title');
@@ -288,6 +288,8 @@
   /* ── SECTION: VISIBILITY ───────────────────────────── */
   function renderVisibilitySection() {
     var vis = content.sectionVisibility || {};
+    var navVis = content.navVisibility || {};
+
     var keys = ['studio', 'lab', 'music', 'lyrics', 'work', 'about'];
     keys.forEach(function(key) {
       var el = $id('vis-' + key);
@@ -296,6 +298,17 @@
       el.addEventListener('change', function() {
         if (!content.sectionVisibility) content.sectionVisibility = {};
         content.sectionVisibility[key] = el.checked;
+      });
+    });
+
+    var navKeys = ['work', 'lab', 'studio', 'music', 'about', 'contact', 'brand'];
+    navKeys.forEach(function(key) {
+      var el = $id('navvis-' + key);
+      if (!el) return;
+      el.checked = navVis[key] !== false; // default to visible
+      el.addEventListener('change', function() {
+        if (!content.navVisibility) content.navVisibility = {};
+        content.navVisibility[key] = el.checked;
       });
     });
   }
