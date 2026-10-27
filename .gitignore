@@ -4,3 +4,5 @@ node_modules/
 *.glb
 *.hdr
 upload_bg.js
+
+.vercel

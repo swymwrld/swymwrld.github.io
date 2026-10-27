@@ -11,7 +11,6 @@
   /* ── Supabase ─────────────────────────────────────── */
   var SUPABASE_URL = 'https://zctfnbiexqzbnjrhgkjq.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGZuYmlleHF6Ym5qcmhna2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NDA0MTUsImV4cCI6MjA5NzExNjQxNX0.N0CLFdvGQ7n0_rqavqZDEmxdC2n7OfJ2EfxQRGhWbMY';
-  var ADMIN_EMAIL  = 'swayamk2105@gmail.com';
   var BUCKET       = 'portfolio-media';
 
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -258,7 +257,8 @@
       profile:'Profile', hero:'Hero & Stats', sitetext:'Site Text & Nav', projects:'Projects',
       videos:'Videos', models:'3D Models', music:'Music & Audio',
       lyrics:'Lyrics', about:'About & Timeline', skills:'Skills & Tags', marquee:'Marquee',
-      visibility:'Section Visibility'
+      visibility:'Section Visibility',
+      security:'Security & Access'
     };
     var titleEl = $id('section-title');
     if (titleEl) titleEl.textContent = titleMap[name] || name;
@@ -280,6 +280,7 @@
       skills:   renderSkillsSection,
       marquee:  renderMarqueeSection,
       visibility: renderVisibilitySection,
+      security: renderSecuritySection,
     };
     if (fn[name]) fn[name]();
   }
@@ -297,6 +298,23 @@
         content.sectionVisibility[key] = el.checked;
       });
     });
+  }
+
+  /* ── SECTION: SECURITY & ACCESS ───────────────────── */
+  async function renderSecuritySection() {
+    var emailEl = $id('security-current-email');
+    if (!emailEl) return;
+    emailEl.textContent = 'Verifying authentication…';
+    try {
+      var userRes = await sb.auth.getUser();
+      if (userRes.data && userRes.data.user && userRes.data.user.email) {
+        emailEl.textContent = userRes.data.user.email;
+      } else {
+        emailEl.textContent = 'Active Administrator Session';
+      }
+    } catch (e) {
+      emailEl.textContent = 'Active Administrator Session';
+    }
   }
 
   /* ── SECTION: ANALYTICS ───────────────────────────── */
@@ -1100,20 +1118,125 @@
       renderTimelineAdmin();
     });
 
+    /* ── Anti-Brute Force Lockout & Saved Email ── */
+    var LOCKOUT_KEY = 'swym_admin_lockout_until';
+    var ATTEMPTS_KEY = 'swym_admin_failed_attempts';
+    var SAVED_EMAIL_KEY = 'swym_admin_saved_email';
+
+    function checkLockout() {
+      var lockoutUntil = parseInt(localStorage.getItem(LOCKOUT_KEY) || '0');
+      var now = Date.now();
+      var msgBox = $id('login-rate-limit-msg');
+      var submitBtn = $id('login-submit-btn');
+
+      if (lockoutUntil > now) {
+        var remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+        if (msgBox) {
+          msgBox.style.display = 'block';
+          msgBox.textContent = 'Too many failed attempts. Security lockout active: ' + remainingSec + 's remaining.';
+        }
+        if (submitBtn) submitBtn.disabled = true;
+        setTimeout(checkLockout, 1000);
+        return true;
+      } else {
+        if (msgBox) msgBox.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = false;
+        return false;
+      }
+    }
+
+    checkLockout();
+
+    var savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
+    var emailInp = $id('admin-email');
+    if (emailInp && savedEmail) {
+      emailInp.value = savedEmail;
+    }
+
     /* Login form */
     var loginForm = $id('login-form');
     if (loginForm) loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
-      var pass = $id('admin-passcode').value;
+      if (checkLockout()) return;
+
+      var email = (($id('admin-email') || {}).value || '').trim();
+      var pass  = ($id('admin-passcode') || {}).value || '';
+
+      if (!email || !pass) {
+        toast('Please enter both email and password.', 'error');
+        return;
+      }
+
       toast('Authenticating…');
-      var res = await sb.auth.signInWithPassword({ email: ADMIN_EMAIL, password: pass });
+      var res = await sb.auth.signInWithPassword({ email: email, password: pass });
       if (res.error) {
-        toast('Access Denied: ' + res.error.message, 'error');
+        var attempts = parseInt(localStorage.getItem(ATTEMPTS_KEY) || '0') + 1;
+        localStorage.setItem(ATTEMPTS_KEY, attempts.toString());
+        if (attempts >= 5) {
+          var lockDuration = 180 * 1000; // 3 minutes lockout
+          localStorage.setItem(LOCKOUT_KEY, (Date.now() + lockDuration).toString());
+          checkLockout();
+          toast('Account temporarily locked (3m) due to failed attempts.', 'error');
+        } else {
+          toast('Access Denied (' + (5 - attempts) + ' attempts remaining): ' + res.error.message, 'error');
+        }
       } else {
+        localStorage.removeItem(ATTEMPTS_KEY);
+        localStorage.removeItem(LOCKOUT_KEY);
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
         showAdminPanel();
         sessionStorage.setItem('admin_authed', '1');
         toast('Welcome back ✓', 'success');
       }
+    });
+
+    /* Change Password form */
+    var cpForm = $id('change-password-form');
+    if (cpForm) cpForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var newPass  = (($id('new-password') || {}).value || '').trim();
+      var confPass = (($id('confirm-password') || {}).value || '').trim();
+
+      if (newPass.length < 8) {
+        toast('Password must be at least 8 characters.', 'error');
+        return;
+      }
+      if (newPass !== confPass) {
+        toast('Passwords do not match.', 'error');
+        return;
+      }
+
+      var btn = $id('update-pass-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+      toast('Updating password on Supabase…');
+
+      try {
+        var updateRes = await sb.auth.updateUser({ password: newPass });
+        if (updateRes.error) {
+          toast('Update failed: ' + updateRes.error.message, 'error');
+        } else {
+          toast('Password successfully updated! ✓', 'success');
+          cpForm.reset();
+        }
+      } catch (err) {
+        toast('Failed to update password.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Update Password'; }
+      }
+    });
+
+    /* Global sign out / invalidate all active sessions */
+    var globalOut = $id('global-signout-btn');
+    if (globalOut) globalOut.addEventListener('click', async function () {
+      if (!confirm('Invalidate all active sessions across all devices? You will be signed out.')) return;
+      toast('Terminating all sessions…');
+      try {
+        await sb.auth.signOut({ scope: 'global' });
+      } catch (e) {}
+      sessionStorage.removeItem('admin_authed');
+      $id('admin-view').hidden = true;
+      $id('login-view').hidden = false;
+      toast('All active sessions invalidated.');
     });
   }
 
@@ -1131,15 +1254,18 @@
   await loadContent();
   bindActions();
 
-  /* SECURITY: Always show login first.
-     Only auto-restore session if user explicitly logged in during THIS
-     browser session (tracked via sessionStorage, not just Supabase cookie). */
+  /* SECURITY: Verify active session directly with Supabase Auth servers */
   var alreadyAuthed = sessionStorage.getItem('admin_authed') === '1';
   if (alreadyAuthed) {
-    var session = await sb.auth.getSession();
-    if (session.data && session.data.session) {
-      showAdminPanel();
-    } else {
+    try {
+      var userRes = await sb.auth.getUser();
+      if (userRes.data && userRes.data.user) {
+        showAdminPanel();
+      } else {
+        sessionStorage.removeItem('admin_authed');
+        await sb.auth.signOut();
+      }
+    } catch (e) {
       sessionStorage.removeItem('admin_authed');
     }
   }

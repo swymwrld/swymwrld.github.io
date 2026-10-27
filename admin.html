@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
     <title>Swayam Portfolio — Admin CMS</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,15 +20,20 @@
       <div class="admin-login-card">
         <p class="eyebrow" style="margin-bottom:10px">Admin CMS</p>
         <h1>Control Room</h1>
-        <p style="color:var(--text-dim);margin-bottom:28px;font-size:0.93rem">Enter your Supabase password to unlock the content editor.</p>
+        <p style="color:var(--text-dim);margin-bottom:28px;font-size:0.93rem">Sign in with your administrator credentials to unlock the CMS.</p>
         <form id="login-form" style="display:grid;gap:14px">
           <div class="form-group">
-            <label for="admin-passcode">Password</label>
-            <input id="admin-passcode" type="password" autocomplete="current-password" placeholder="Your Supabase account password" required />
+            <label for="admin-email">Admin Email</label>
+            <input id="admin-email" type="email" autocomplete="username" placeholder="admin@domain.com" required />
           </div>
-          <button class="btn btn-primary btn-full" type="submit">Unlock CMS &#8594;</button>
+          <div class="form-group">
+            <label for="admin-passcode">Password</label>
+            <input id="admin-passcode" type="password" autocomplete="current-password" placeholder="••••••••••••" required />
+          </div>
+          <div id="login-rate-limit-msg" style="display:none;color:var(--red);font-size:0.84rem;line-height:1.4;text-align:center;padding:8px;background:rgba(248,113,113,0.1);border-radius:var(--r-sm);border:1px solid rgba(248,113,113,0.3)"></div>
+          <button class="btn btn-primary btn-full" id="login-submit-btn" type="submit">Unlock CMS &#8594;</button>
         </form>
-        <p style="color:var(--text-faint);font-size:0.78rem;margin-top:18px;text-align:center">Secured via Supabase Auth.</p>
+        <p style="color:var(--text-faint);font-size:0.78rem;margin-top:18px;text-align:center">End-to-end encrypted via Supabase Auth TLS.</p>
       </div>
     </div>
 
@@ -67,6 +73,7 @@
 
         <p class="sidebar-section-label">Settings</p>
         <button class="admin-nav-btn" data-section="visibility">        <span class="nav-icon">&#128065;</span> Section Visibility</button>
+        <button class="admin-nav-btn" data-section="security">          <span class="nav-icon">&#128274;</span> Security &amp; Password</button>
 
         <div class="sidebar-footer">
           <a class="btn btn-ghost btn-sm btn-full" href="index.html" target="_blank">&#128064; View Site</a>
@@ -353,6 +360,42 @@
               </label>
             </div>
           </div>
+        <!-- ── SECURITY & ACCESS ── -->
+        <section id="section-security" class="admin-section">
+          <div class="admin-card" style="max-width:620px;margin-bottom:20px">
+            <p class="admin-card-title">&#128100; Active Administrator Account</p>
+            <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:8px">Currently authenticated as:</p>
+            <div id="security-current-email" style="font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:600;font-size:0.95rem;background:rgba(34,211,238,0.08);padding:10px 14px;border-radius:var(--r-sm);border:1px solid rgba(34,211,238,0.2);display:inline-block">Loading…</div>
+          </div>
+
+          <div class="admin-card" style="max-width:620px;margin-bottom:20px">
+            <p class="admin-card-title">&#128272; Change Master Password</p>
+            <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:18px">
+              Update your account password on Supabase. Your password is never stored in source code or GitHub; it is hashed and salted with industry-standard cryptographic protection on Supabase.
+            </p>
+            <form id="change-password-form" style="display:grid;gap:14px">
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input id="new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required />
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input id="confirm-password" type="password" autocomplete="new-password" placeholder="Repeat new password" minlength="8" required />
+              </div>
+              <button class="btn btn-primary" type="submit" id="update-pass-btn">Update Password</button>
+            </form>
+          </div>
+
+          <div class="admin-card" style="max-width:620px">
+            <p class="admin-card-title">&#128737; Security Protocols &amp; Hardening</p>
+            <ul style="color:var(--text-dim);font-size:0.85rem;line-height:1.8;padding-left:18px;margin-bottom:18px">
+              <li><strong>Zero Secrets in Code:</strong> Admin email and passwords are completely excluded from files, commits, and branches.</li>
+              <li><strong>Row-Level Security (RLS):</strong> Unauthenticated public users are denied database write access.</li>
+              <li><strong>Anti-Brute Force:</strong> Client-side exponential lockout prevents credential-stuffing attacks.</li>
+              <li><strong>Real-time Session Verification:</strong> Sessions are verified against the auth server on every page load.</li>
+            </ul>
+            <button class="btn btn-danger btn-sm" id="global-signout-btn">Invalidate All Devices &amp; Sign Out</button>
+          </div>
         </section>
 
       </main>
@@ -380,6 +423,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/content.js?v=4"></script>
-    <script src="assets/admin.js?v=3"></script>
+    <script src="assets/admin.js?v=4"></script>
   </body>
 </html>
